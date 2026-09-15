@@ -40,3 +40,5 @@ genkey.js
 !.env.example
 
 .vercel
+
+GENKEY.bat
