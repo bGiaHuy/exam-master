@@ -13,7 +13,9 @@ import {
   CheckCircle2,
   Upload,
   Crown,
-  Zap
+  Zap,
+  LogIn,
+  UserCheck
 } from 'lucide-react';
 
 export default function HomeDashboard({
@@ -26,7 +28,9 @@ export default function HomeDashboard({
   adminExamsCount = 3,
   clientExamsCount = 0,
   examsCount = 3,
-  lecturesCount = 3
+  lecturesCount = 3,
+  currentUser = null,
+  onOpenSsoModal
 }) {
   return (
     <div className="main-wrapper">
@@ -55,12 +59,14 @@ export default function HomeDashboard({
           )}
 
           <h1 style={{ fontSize: '2.1rem', fontWeight: '900', lineHeight: '1.3', marginBottom: '0.75rem', color: 'var(--text-main)' }}>
-            {subscription?.isPro ? 'Chào mừng Bố đến với ExamMaster PRO 💎' : 'Chào mừng Bố đến với ExamMaster'}
+            {currentUser 
+              ? (subscription?.isPro ? `Chào mừng ${currentUser.name} đến với ExamMaster PRO 💎` : `Chào mừng ${currentUser.name} đến với ExamMaster`)
+              : (subscription?.isPro ? 'Chào mừng Bố đến với ExamMaster PRO 💎' : 'Chào mừng Bố đến với ExamMaster')}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '1.5rem' }}>
             {subscription?.isPro 
-              ? 'Tài khoản của Bố đang sở hữu toàn bộ đặc quyền cao cấp nhất: Chấm điểm tự luận không giới hạn, đường truyền AI ưu tiên tức thì 1-2s và phân tích chuyên sâu bản chất mọi câu sai!'
-              : 'Hệ thống được thiết kế riêng để bố học tập dễ dàng nhất: Đọc bài giảng tiếng Việt có ví dụ minh họa gần gũi, thi cử chống phân tâm và tự động chuyển câu sai thành tự luận để AI chấm bài (Miễn phí 3 lần/ngày).'
+              ? `Tài khoản ${currentUser?.name || 'của Bố'} đang sở hữu toàn bộ đặc quyền cao cấp nhất: Chấm điểm tự luận không giới hạn, đường truyền AI ưu tiên tức thì 1-2s và phân tích chuyên sâu bản chất mọi câu sai!`
+              : `Hệ thống được thiết kế riêng để học tập dễ dàng nhất: Đọc bài giảng tiếng Việt có ví dụ minh họa gần gũi, thi cử chống phân tâm và tự động chuyển câu sai thành tự luận để AI chấm bài (Miễn phí 3 lần/ngày).`
             }
           </p>
 
@@ -94,6 +100,22 @@ export default function HomeDashboard({
             >
               <GraduationCap size={18} /> Vào Phân Khu Thi Cử
             </button>
+            {!currentUser && (
+              <button
+                className="btn btn-secondary"
+                style={{ 
+                  padding: '0.8rem 1.4rem', 
+                  fontSize: '0.95rem',
+                  borderColor: 'var(--primary-border)',
+                  background: 'var(--primary-light)',
+                  color: 'var(--primary)',
+                  fontWeight: '700'
+                }}
+                onClick={onOpenSsoModal}
+              >
+                <LogIn size={18} /> Đăng Nhập SSO
+              </button>
+            )}
             <button
               className="btn btn-secondary"
               style={{ padding: '0.8rem 1.4rem', fontSize: '0.95rem' }}

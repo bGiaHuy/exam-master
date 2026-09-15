@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   BookOpen, 
   GraduationCap, 
@@ -16,7 +16,9 @@ import {
   Crown,
   Lock,
   LogOut,
-  Sparkles
+  Sparkles,
+  LogIn,
+  User
 } from 'lucide-react';
 import { sound } from '../utils/soundEffects';
 
@@ -36,9 +38,26 @@ export default function Navbar({
   onOpenProModal,
   isAdmin = false,
   onOpenAdminLogin,
-  onLogoutAdmin
+  onLogoutAdmin,
+  currentUser = null,
+  onOpenSsoModal,
+  onLogoutUser
 }) {
   const [soundActive, setSoundActive] = useState(sound.isSoundEnabled());
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    if (userMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [userMenuOpen]);
 
   const handleSoundToggle = () => {
     const next = sound.toggleSound();
@@ -223,6 +242,117 @@ export default function Navbar({
           <Upload size={15} />
           <span>Thêm Đề .md</span>
         </button>
+
+        {/* SSO User Profile / Login */}
+        {currentUser ? (
+          <div className="user-menu-container" ref={userMenuRef}>
+            <button
+              className="user-avatar-btn"
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              title={`Tài khoản: ${currentUser.name} (${currentUser.email})`}
+            >
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="user-nav-avatar"
+                onError={(e) => {
+                  e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentUser.email)}`;
+                }}
+              />
+              <span style={{ fontSize: '0.82rem', fontWeight: '700', maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {currentUser.name?.split(' ')[0] || 'Tài khoản'}
+              </span>
+              {currentUser.isPro ? (
+                <span className="pro-badge" style={{ fontSize: '0.62rem', padding: '0.05rem 0.35rem' }}>
+                  PRO
+                </span>
+              ) : (
+                <span style={{ fontSize: '0.62rem', background: 'rgba(0,0,0,0.06)', padding: '0.05rem 0.35rem', borderRadius: '4px', fontWeight: '600' }}>
+                  FREE
+                </span>
+              )}
+            </button>
+
+            {userMenuOpen && (
+              <div className="user-dropdown-menu">
+                <div className="user-dropdown-header">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.target.src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(currentUser.email)}`;
+                    }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {currentUser.name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {currentUser.email}
+                    </div>
+                    <div style={{ display: 'inline-block', marginTop: '0.2rem', fontSize: '0.68rem', background: 'var(--primary-light)', color: 'var(--primary)', padding: '0.05rem 0.4rem', borderRadius: '4px', fontWeight: '700' }}>
+                      {currentUser.provider?.toUpperCase()} SSO
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ padding: '0.4rem 0' }}>
+                  <button
+                    className="user-dropdown-item"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      onOpenSsoModal();
+                    }}
+                  >
+                    <User size={15} />
+                    <span>Hồ Sơ & Thiết Lập SSO</span>
+                  </button>
+
+                  <button
+                    className="user-dropdown-item"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      onOpenProModal();
+                    }}
+                  >
+                    <Crown size={15} color="#f59e0b" />
+                    <span>{subscription?.isPro ? 'Đặc Quyền PRO VIP' : 'Nâng Cấp Gói PRO ($3)'}</span>
+                  </button>
+
+                  <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.3rem 0' }}></div>
+
+                  <button
+                    className="user-dropdown-item danger"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      if (onLogoutUser) onLogoutUser();
+                    }}
+                  >
+                    <LogOut size={15} />
+                    <span>Đăng Xuất SSO</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            className="btn btn-primary"
+            style={{ 
+              fontSize: '0.82rem', 
+              padding: '0.45rem 0.8rem',
+              background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+              border: 'none',
+              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+            }}
+            onClick={onOpenSsoModal}
+            title="Đăng nhập tài khoản bằng Google, Microsoft hoặc Chế độ Học viên"
+          >
+            <LogIn size={15} />
+            <span>Đăng Nhập SSO</span>
+          </button>
+        )}
 
         {/* Admin Dashboard / Admin Login Button */}
         {isAdmin ? (

@@ -25,7 +25,9 @@ import {
   Cpu,
   Binary,
   Tag,
-  Copy
+  Copy,
+  LogIn,
+  Mail
 } from 'lucide-react';
 import { 
   adminLogout, 
@@ -41,6 +43,7 @@ import {
 } from '../utils/subscriptionManager';
 import { generateVipLicenseKey, generateSymmetricLicenseKey, verifySymmetricLicenseKey } from '../utils/cryptoSecurity.js';
 import { getMaskedSystemApiKey, setSystemApiKey } from '../data/apiConfig.js';
+import { getSsoConfig, saveSsoConfig, getLoginHistory } from '../utils/ssoAuth.js';
 import { sound } from '../utils/soundEffects';
 
 export default function AdminDashboard({
@@ -80,6 +83,15 @@ export default function AdminDashboard({
 
   // Filter for exams tab
   const [examSubjectFilter, setExamSubjectFilter] = useState('ALL');
+
+  // SSO Configuration state
+  const [ssoConfig, setSsoConfig] = useState(() => getSsoConfig());
+  const [ssoGoogleClientId, setSsoGoogleClientId] = useState(() => getSsoConfig().googleClientId || '');
+  const [ssoMicrosoftClientId, setSsoMicrosoftClientId] = useState(() => getSsoConfig().microsoftClientId || '');
+  const [ssoAllowedDomains, setSsoAllowedDomains] = useState(() => (getSsoConfig().allowedDomains || []).join(', '));
+  const [ssoAutoProDomains, setSsoAutoProDomains] = useState(() => (getSsoConfig().autoProDomains || []).join(', '));
+  const [ssoSaveMsg, setSsoSaveMsg] = useState(null);
+  const [ssoHistory, setSsoHistory] = useState(() => getLoginHistory());
 
   useEffect(() => {
     const handleSubChange = () => setSubStatus(getSubscriptionStatus());
@@ -231,6 +243,27 @@ export default function AdminDashboard({
     URL.revokeObjectURL(url);
   };
 
+  const handleSaveSsoConfig = (e) => {
+    e.preventDefault();
+    const domains = ssoAllowedDomains.split(',').map(d => d.trim()).filter(Boolean);
+    const autoPro = ssoAutoProDomains.split(',').map(d => d.trim()).filter(Boolean);
+    const res = saveSsoConfig({
+      googleClientId: ssoGoogleClientId.trim(),
+      microsoftClientId: ssoMicrosoftClientId.trim(),
+      allowedDomains: domains,
+      autoProDomains: autoPro
+    });
+    if (res.success) {
+      setSsoSaveMsg({ type: 'success', text: 'Cấu hình SSO đã được lưu thành công!' });
+      sound.playCorrect();
+      setSsoHistory(getLoginHistory());
+    } else {
+      setSsoSaveMsg({ type: 'error', text: 'Lỗi lưu cấu hình: ' + res.error });
+      sound.playWrong();
+    }
+    setTimeout(() => setSsoSaveMsg(null), 3500);
+  };
+
   const filteredExams = exams.filter(ex => {
     if (examSubjectFilter === 'ALL') return true;
     if (examSubjectFilter === 'CUSTOM') {
@@ -298,6 +331,7 @@ export default function AdminDashboard({
           { id: 'overview', label: '📊 Tổng Quan & Thống Kê' },
           { id: 'exams', label: `📚 Quản Lý Đề Thi (${exams.length})` },
           { id: 'subscription', label: '💎 Gói Cước & AI Quota' },
+          { id: 'sso', label: '🔐 Cấu Hình SSO' },
           { id: 'settings', label: '⚙️ Cấu Hình & Bảo Mật' }
         ].map(tab => (
           <button
@@ -724,6 +758,195 @@ export default function AdminDashboard({
                 })}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB SSO: CẤU HÌNH SSO & ĐĂNG NHẬP */}
+      {activeTab === 'sso' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* SSO Configuration Card */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '800', margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <LogIn size={22} color="var(--primary)" /> Cấu Hình Single Sign-On (Google & Microsoft SSO)
+                </h2>
+                <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+                  Cho phép người dùng đăng nhập bằng Google hoặc tài khoản trường học (ví dụ: FPT University @fpt.edu.vn)
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveSsoConfig}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                {/* Google Client ID */}
+                <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <KeyRound size={18} color="#4285F4" />
+                    <label style={{ fontSize: '0.9rem', fontWeight: '700' }}>
+                      Google OAuth Client ID
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontSize: '0.85rem' }}
+                    placeholder="VD: 1234567890-abcdefg.apps.googleusercontent.com"
+                    value={ssoGoogleClientId}
+                    onChange={(e) => setSsoGoogleClientId(e.target.value)}
+                  />
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', marginTop: '0.4rem', lineHeight: 1.4 }}>
+                    Tạo trên Google Cloud Console &gt; Credentials &gt; OAuth 2.0 Client IDs (Web application).
+                  </p>
+                </div>
+
+                {/* Microsoft Entra Client ID */}
+                <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <KeyRound size={18} color="#05a6f0" />
+                    <label style={{ fontSize: '0.9rem', fontWeight: '700' }}>
+                      Microsoft Entra Client ID (Office 365)
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontSize: '0.85rem' }}
+                    placeholder="VD: 89a8c17b-4029-4b68-967c-..."
+                    value={ssoMicrosoftClientId}
+                    onChange={(e) => setSsoMicrosoftClientId(e.target.value)}
+                  />
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', marginTop: '0.4rem', lineHeight: 1.4 }}>
+                    Đăng ký ứng dụng trong Microsoft Entra ID (Azure AD) để học viên đăng nhập bằng email trường.
+                  </p>
+                </div>
+
+                {/* Allowed Domains */}
+                <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <Mail size={18} color="var(--purple)" />
+                    <label style={{ fontSize: '0.9rem', fontWeight: '700' }}>
+                      Tên Miền Email Cho Phép (Allowed Domains)
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontSize: '0.85rem' }}
+                    placeholder="Để trống = Mọi tên miền (hoặc: fpt.edu.vn, gmail.com)"
+                    value={ssoAllowedDomains}
+                    onChange={(e) => setSsoAllowedDomains(e.target.value)}
+                  />
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', marginTop: '0.4rem', lineHeight: 1.4 }}>
+                    Phân tách nhiều tên miền bằng dấu phẩy. Để trống nếu muốn mở cho tất cả người dùng.
+                  </p>
+                </div>
+
+                {/* Auto-PRO Educational Domains */}
+                <div style={{ background: 'var(--bg-main)', padding: '1.25rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <Crown size={18} color="#f59e0b" />
+                    <label style={{ fontSize: '0.9rem', fontWeight: '700' }}>
+                      Miền Tự Động Kích Hoạt PRO (Auto-PRO Domains)
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    className="form-input"
+                    style={{ fontSize: '0.85rem' }}
+                    placeholder="VD: fpt.edu.vn"
+                    value={ssoAutoProDomains}
+                    onChange={(e) => setSsoAutoProDomains(e.target.value)}
+                  />
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-subtle)', marginTop: '0.4rem', lineHeight: 1.4 }}>
+                    Người dùng đăng nhập với đuôi email này (ví dụ sinh viên FPT) sẽ tự động nhận đặc quyền VIP PRO.
+                  </p>
+                </div>
+              </div>
+
+              {ssoSaveMsg && (
+                <div style={{
+                  background: ssoSaveMsg.type === 'success' ? 'var(--success-light)' : 'var(--danger-light)',
+                  color: ssoSaveMsg.type === 'success' ? 'var(--success)' : 'var(--danger)',
+                  border: `1px solid ${ssoSaveMsg.type === 'success' ? 'var(--success-border)' : 'var(--danger-border)'}`,
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.6rem 1rem',
+                  fontSize: '0.85rem',
+                  marginBottom: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  {ssoSaveMsg.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <span>{ssoSaveMsg.text}</span>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.5rem', fontSize: '0.9rem' }}>
+                  Lưu Cấu Hình SSO
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Recent SSO Logins Audit */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-lg)', padding: '1.75rem' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: '800', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <ShieldCheck size={20} color="var(--primary)" /> Lịch Sử Đăng Nhập SSO Gần Đây ({ssoHistory.length})
+            </h3>
+            
+            {ssoHistory.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                Chưa có lượt đăng nhập SSO nào được ghi nhận. Thử đăng nhập qua SSO trên Navbar!
+              </div>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid var(--border-color)', textAlign: 'left', color: 'var(--text-muted)' }}>
+                      <th style={{ padding: '0.6rem 0.8rem' }}>Thời Gian</th>
+                      <th style={{ padding: '0.6rem 0.8rem' }}>Người Dùng</th>
+                      <th style={{ padding: '0.6rem 0.8rem' }}>Email</th>
+                      <th style={{ padding: '0.6rem 0.8rem' }}>Nhà Cung Cấp</th>
+                      <th style={{ padding: '0.6rem 0.8rem' }}>Trạng Thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ssoHistory.map((item, idx) => (
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '0.6rem 0.8rem', color: 'var(--text-subtle)' }}>
+                          {new Date(item.timestamp).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '0.6rem 0.8rem', fontWeight: '700', color: 'var(--text-main)' }}>
+                          {item.name}
+                        </td>
+                        <td style={{ padding: '0.6rem 0.8rem', color: 'var(--text-muted)' }}>
+                          {item.email}
+                        </td>
+                        <td style={{ padding: '0.6rem 0.8rem' }}>
+                          <span style={{ 
+                            background: item.provider === 'google' ? 'rgba(66, 133, 244, 0.1)' : item.provider === 'microsoft' ? 'rgba(5, 166, 240, 0.1)' : 'rgba(124, 58, 237, 0.1)',
+                            color: item.provider === 'google' ? '#4285F4' : item.provider === 'microsoft' ? '#05a6f0' : 'var(--purple)',
+                            padding: '0.15rem 0.5rem',
+                            borderRadius: 'var(--radius-full)',
+                            fontSize: '0.75rem',
+                            fontWeight: '700',
+                            textTransform: 'uppercase'
+                          }}>
+                            {item.provider}
+                          </span>
+                        </td>
+                        <td style={{ padding: '0.6rem 0.8rem', color: 'var(--success)', fontWeight: '600' }}>
+                          ✓ Thành công
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -11,12 +11,14 @@ import ImportExamModal from './components/ImportExamModal';
 import ProUpgradeModal from './components/ProUpgradeModal';
 import AdminDashboard from './components/AdminDashboard';
 import AdminLoginModal from './components/AdminLoginModal';
+import SsoLoginModal from './components/SsoLoginModal';
 import { DEFAULT_EXAMS } from './data/sampleExams';
 import { DEFAULT_LECTURES } from './data/studyLectures';
 import { getActiveApiKey } from './data/apiConfig';
 import { sound } from './utils/soundEffects';
-import { getSubscriptionStatus } from './utils/subscriptionManager';
+import { getSubscriptionStatus, upgradeToPro } from './utils/subscriptionManager';
 import { isAdminLoggedIn, adminLogout } from './utils/adminAuth';
+import { getCurrentUser, logoutSsoUser } from './utils/ssoAuth';
 
 export default function App() {
   // Navigation: 'home' | 'study' | 'exam_hub' | 'test' | 'result' | 'essay_review'
@@ -70,11 +72,15 @@ export default function App() {
   // Admin Authentication (Default password: 123)
   const [isAdmin, setIsAdmin] = useState(() => isAdminLoggedIn());
 
+  // SSO Authentication
+  const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
+
   // Modals
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showSsoModal, setShowSsoModal] = useState(false);
 
   useEffect(() => {
     const handleSubChange = () => {
@@ -90,6 +96,18 @@ export default function App() {
     };
     window.addEventListener('admin-auth-changed', handleAdminChange);
     return () => window.removeEventListener('admin-auth-changed', handleAdminChange);
+  }, []);
+
+  useEffect(() => {
+    const handleSsoChange = () => {
+      const user = getCurrentUser();
+      setCurrentUser(user);
+      if (user?.isPro) {
+        try { upgradeToPro('VIP_SSO_AUTO_GRANT'); } catch (e) {}
+      }
+    };
+    window.addEventListener('sso-auth-changed', handleSsoChange);
+    return () => window.removeEventListener('sso-auth-changed', handleSsoChange);
   }, []);
 
   const handleDeleteCustomExam = (examId) => {
@@ -232,6 +250,9 @@ export default function App() {
           setIsAdmin(false);
           if (currentView === 'admin') setCurrentView('home');
         }}
+        currentUser={currentUser}
+        onOpenSsoModal={() => setShowSsoModal(true)}
+        onLogoutUser={logoutSsoUser}
       />
 
       {/* 1. Home Dashboard */}
@@ -247,6 +268,8 @@ export default function App() {
           clientExamsCount={exams.filter(e => e.source === 'client' || e.isCustom).length}
           examsCount={exams.length}
           lecturesCount={DEFAULT_LECTURES.length}
+          currentUser={currentUser}
+          onOpenSsoModal={() => setShowSsoModal(true)}
         />
       )}
 
@@ -369,6 +392,15 @@ export default function App() {
         onLoginSuccess={() => {
           setIsAdmin(true);
           setCurrentView('admin');
+        }}
+      />
+
+      <SsoLoginModal
+        isOpen={showSsoModal}
+        onClose={() => setShowSsoModal(false)}
+        currentUser={currentUser}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
         }}
       />
     </div>
