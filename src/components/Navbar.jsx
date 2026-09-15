@@ -18,12 +18,13 @@ import {
   LogOut,
   Sparkles,
   LogIn,
-  User
+  User,
+  FileText
 } from 'lucide-react';
 import { sound } from '../utils/soundEffects';
 
 export default function Navbar({
-  currentView, // 'home' | 'study' | 'exam_hub' | 'test' | 'result' | 'essay_review' | 'admin'
+  currentView, // 'home' | 'study' | 'exam_hub' | 'test' | 'result' | 'essay_review' | 'admin' | 'legal'
   onNavigate,
   antiTabEnabled,
   onToggleAntiTab,
@@ -41,7 +42,8 @@ export default function Navbar({
   onLogoutAdmin,
   currentUser = null,
   onOpenSsoModal,
-  onLogoutUser
+  onLogoutUser,
+  onOpenLegalPolicy
 }) {
   const [soundActive, setSoundActive] = useState(sound.isSoundEnabled());
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -318,6 +320,17 @@ export default function Navbar({
                   >
                     <Crown size={15} color="#f59e0b" />
                     <span>{subscription?.isPro ? 'Đặc Quyền PRO VIP' : 'Nâng Cấp Gói PRO ($3)'}</span>
+                  </button>
+
+                  <button
+                    className="user-dropdown-item"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      if (onOpenLegalPolicy) onOpenLegalPolicy('privacy');
+                    }}
+                  >
+                    <FileText size={15} />
+                    <span>Pháp Lý & Quyền Riêng Tư</span>
                   </button>
 
                   <div style={{ borderTop: '1px solid var(--border-color)', margin: '0.3rem 0' }}></div>

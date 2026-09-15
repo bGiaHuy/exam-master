@@ -1767,3 +1767,106 @@ body {
   color: var(--danger);
 }
 
+/* ==========================================================================
+   Legal Hub & Footer Styles
+   ========================================================================== */
+
+.footer-link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.15s ease;
+}
+
+.footer-link-btn:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.policy-rendered-content {
+  line-height: 1.7;
+  color: var(--text-main);
+}
+
+.policy-rendered-content h1 {
+  font-size: 1.6rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border-subtle);
+  padding-bottom: 0.4rem;
+}
+
+.policy-rendered-content h2 {
+  font-size: 1.35rem;
+  margin-top: 1.75rem;
+  margin-bottom: 0.6rem;
+  color: var(--text-main);
+}
+
+.policy-rendered-content h3 {
+  font-size: 1.15rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.policy-rendered-content h4 {
+  font-size: 1rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.4rem;
+  color: var(--text-main);
+}
+
+.policy-rendered-content p {
+  margin-bottom: 1rem;
+}
+
+.policy-rendered-content ul,
+.policy-rendered-content ol {
+  margin-bottom: 1.2rem;
+  padding-left: 1.5rem;
+}
+
+.policy-rendered-content li {
+  margin-bottom: 0.35rem;
+}
+
+.policy-rendered-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.88rem;
+}
+
+.policy-rendered-content th,
+.policy-rendered-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.policy-rendered-content th {
+  background: var(--bg-glass);
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.policy-rendered-content td {
+  background: var(--bg-surface);
+}
+
+@media (max-width: 768px) {
+  .legal-layout-container {
+    grid-template-columns: 1fr !important;
+  }
+}

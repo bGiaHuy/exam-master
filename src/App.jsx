@@ -12,6 +12,8 @@ import ProUpgradeModal from './components/ProUpgradeModal';
 import AdminDashboard from './components/AdminDashboard';
 import AdminLoginModal from './components/AdminLoginModal';
 import SsoLoginModal from './components/SsoLoginModal';
+import LegalHub from './components/LegalHub';
+import Footer from './components/Footer';
 import { DEFAULT_EXAMS } from './data/sampleExams';
 import { DEFAULT_LECTURES } from './data/studyLectures';
 import { getActiveApiKey } from './data/apiConfig';
@@ -21,9 +23,18 @@ import { isAdminLoggedIn, adminLogout } from './utils/adminAuth';
 import { getCurrentUser, logoutSsoUser } from './utils/ssoAuth';
 
 export default function App() {
-  // Navigation: 'home' | 'study' | 'exam_hub' | 'test' | 'result' | 'essay_review'
+  // Navigation: 'home' | 'study' | 'exam_hub' | 'test' | 'result' | 'essay_review' | 'admin' | 'legal'
   const [currentView, setCurrentView] = useState('home');
   const [activeSubject, setActiveSubject] = useState('ALL');
+  const [activeLegalTab, setActiveLegalTab] = useState('terms');
+
+  const handleOpenLegalPolicy = (tabId = 'terms') => {
+    setActiveLegalTab(tabId);
+    setCurrentView('legal');
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Exams: Separation of Admin Official Repository & Client Uploaded Exams
   const [exams, setExams] = useState(() => {
@@ -253,6 +264,7 @@ export default function App() {
         currentUser={currentUser}
         onOpenSsoModal={() => setShowSsoModal(true)}
         onLogoutUser={logoutSsoUser}
+        onOpenLegalPolicy={handleOpenLegalPolicy}
       />
 
       {/* 1. Home Dashboard */}
@@ -362,6 +374,31 @@ export default function App() {
         )
       )}
 
+      {/* 8. Legal & Policy Center */}
+      {currentView === 'legal' && (
+        <LegalHub
+          initialTab={activeLegalTab}
+          onBack={() => setCurrentView('home')}
+          onDataCleared={() => {
+            setSubscription(getSubscriptionStatus());
+            setCurrentUser(null);
+            setCurrentView('home');
+          }}
+        />
+      )}
+
+      {/* Global Application Footer */}
+      <Footer
+        onNavigate={(view) => {
+          if (view === 'legal') handleOpenLegalPolicy('terms');
+          else setCurrentView(view);
+          if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+        onOpenLegalTab={handleOpenLegalPolicy}
+      />
+
       {/* Modals */}
       <ApiKeyModal
         isOpen={showApiKeyModal}
@@ -384,6 +421,7 @@ export default function App() {
           setShowProModal(false);
           setShowApiKeyModal(true);
         }}
+        onOpenLegalPolicy={handleOpenLegalPolicy}
       />
 
       <AdminLoginModal
@@ -402,6 +440,7 @@ export default function App() {
         onLoginSuccess={(user) => {
           setCurrentUser(user);
         }}
+        onOpenLegalPolicy={handleOpenLegalPolicy}
       />
     </div>
   );

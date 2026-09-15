@@ -29,7 +29,8 @@ export default function ProUpgradeModal({
   onClose, 
   onSubscriptionChanged,
   onOpenApiKeyModal,
-  initialShowExplanation = false
+  initialShowExplanation = false,
+  onOpenLegalPolicy
 }) {
   const [licenseKeyInput, setLicenseKeyInput] = useState('');
   const [message, setMessage] = useState(null);
@@ -426,6 +427,46 @@ export default function ProUpgradeModal({
                 </ul>
               </div>
             )}
+          </div>
+
+          {/* Legal & Refund Policy Transparency Note */}
+          <div style={{
+            marginTop: '0.85rem',
+            paddingTop: '0.65rem',
+            borderTop: '1px solid var(--border-subtle)',
+            fontSize: '0.78rem',
+            color: 'var(--text-subtle)',
+            lineHeight: '1.5'
+          }}>
+            <div>
+              🛡️ <strong>Minh bạch tài chính:</strong> Gói cước là trả trước theo thời hạn cố định, <strong>KHÔNG tự động trừ tiền thẻ</strong> và <strong>KHÔNG tự động gia hạn ngầm</strong>.
+            </div>
+            <div style={{ marginTop: '0.25rem' }}>
+              Bằng việc kích hoạt, bạn xác nhận đồng ý với{' '}
+              <button 
+                type="button" 
+                className="footer-link-btn" 
+                style={{ fontSize: '0.78rem', color: 'var(--primary)', fontWeight: '600' }}
+                onClick={() => {
+                  onClose();
+                  if (onOpenLegalPolicy) onOpenLegalPolicy('terms');
+                }}
+              >
+                Điều Khoản Dịch Vụ
+              </button>
+              {' '}và{' '}
+              <button 
+                type="button" 
+                className="footer-link-btn" 
+                style={{ fontSize: '0.78rem', color: 'var(--primary)', fontWeight: '600' }}
+                onClick={() => {
+                  onClose();
+                  if (onOpenLegalPolicy) onOpenLegalPolicy('payment');
+                }}
+              >
+                Chính Sách Hoàn Tiền
+              </button>.
+            </div>
           </div>
         </div>
 

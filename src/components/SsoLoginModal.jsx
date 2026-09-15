@@ -16,7 +16,8 @@ import {
   KeyRound,
   UserCheck,
   Building2,
-  Mail
+  Mail,
+  Trash2
 } from 'lucide-react';
 import { 
   getCurrentUser, 
@@ -54,7 +55,8 @@ export default function SsoLoginModal({
   isOpen,
   onClose,
   currentUser,
-  onLoginSuccess
+  onLoginSuccess,
+  onOpenLegalPolicy
 }) {
   const [ssoConfig, setConfig] = useState(() => getSsoConfig());
   const [showConfigDrawer, setShowConfigDrawer] = useState(false);
@@ -301,18 +303,31 @@ export default function SsoLoginModal({
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-                <button className="btn btn-secondary" onClick={onClose} style={{ fontSize: '0.88rem' }}>
-                  Tiếp Tục Học Tập
-                </button>
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button 
-                  className="btn btn-danger" 
-                  onClick={handleLogout}
-                  style={{ fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  type="button"
+                  className="footer-link-btn" 
+                  style={{ fontSize: '0.82rem', color: 'var(--danger)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
+                  onClick={() => {
+                    onClose();
+                    if (onOpenLegalPolicy) onOpenLegalPolicy('deletion');
+                  }}
                 >
-                  <LogOut size={16} />
-                  <span>Đăng Xuất</span>
+                  <Trash2 size={14} /> Xóa Dữ Liệu Cục Bộ
                 </button>
+                <div style={{ display: 'flex', gap: '0.6rem' }}>
+                  <button className="btn btn-secondary" onClick={onClose} style={{ fontSize: '0.88rem' }}>
+                    Tiếp Tục Học Tập
+                  </button>
+                  <button 
+                    className="btn btn-danger" 
+                    onClick={handleLogout}
+                    style={{ fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    <LogOut size={16} />
+                    <span>Đăng Xuất</span>
+                  </button>
+                </div>
               </div>
             </div>
           ) : (
@@ -347,6 +362,34 @@ export default function SsoLoginModal({
                   <MicrosoftIcon />
                   <span>Đăng nhập với Microsoft (Email FPT / Office 365)</span>
                 </button>
+
+                {/* Consent & Policy Links */}
+                <div style={{ fontSize: '0.76rem', color: 'var(--text-subtle)', textAlign: 'center', lineHeight: '1.4', marginTop: '0.2rem' }}>
+                  Bằng việc đăng nhập, bạn đồng ý với{' '}
+                  <button 
+                    type="button" 
+                    className="footer-link-btn" 
+                    style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
+                    onClick={() => {
+                      onClose();
+                      if (onOpenLegalPolicy) onOpenLegalPolicy('terms');
+                    }}
+                  >
+                    Điều Khoản Dịch Vụ
+                  </button>
+                  {' '}và{' '}
+                  <button 
+                    type="button" 
+                    className="footer-link-btn" 
+                    style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
+                    onClick={() => {
+                      onClose();
+                      if (onOpenLegalPolicy) onOpenLegalPolicy('privacy');
+                    }}
+                  >
+                    Chính Sách Quyền Riêng Tư
+                  </button>.
+                </div>
               </div>
 
               {/* Divider */}
