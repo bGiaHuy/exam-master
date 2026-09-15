@@ -148,7 +148,7 @@ export default function ProUpgradeModal({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--danger)', fontSize: '0.88rem' }}>
               <AlertCircle size={20} style={{ flexShrink: 0 }} />
               <div>
-                <strong>Bố đã sử dụng hết 3 lượt hỏi AI miễn phí hôm nay!</strong>
+                <strong>Bạn đã sử dụng hết 3 lượt hỏi AI miễn phí hôm nay!</strong>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
                   Hạn ngạch sẽ tự động hồi phục vào 00:00 ngày mai, hoặc kích hoạt mã VIP để mở khóa không giới hạn.
                 </div>
@@ -265,7 +265,7 @@ export default function ProUpgradeModal({
             }}>
               <div style={{ marginBottom: '0.75rem' }}>
                 <strong style={{ color: 'var(--purple)' }}>1. Chi phí mua API thực tế (Tính tiền theo từng từ Token):</strong><br />
-                Mỗi khi Bố bấm nộp bài để AI chấm điểm hoặc chuyển đổi slide, hệ thống phải gửi dữ liệu lên máy chủ DeepSeek/Gemini. Mỗi yêu cầu đều bị nhà cung cấp trừ tiền trực tiếp vào tài khoản ngân hàng của chủ hệ thống.
+                Mỗi khi bạn bấm nộp bài để AI chấm điểm hoặc chuyển đổi slide, hệ thống phải gửi dữ liệu lên máy chủ DeepSeek/Gemini. Mỗi yêu cầu đều bị nhà cung cấp trừ tiền trực tiếp vào tài khoản ngân hàng của chủ hệ thống.
               </div>
 
               <div style={{ marginBottom: '0.75rem' }}>
@@ -275,7 +275,7 @@ export default function ProUpgradeModal({
 
               <div>
                 <strong style={{ color: 'var(--purple)' }}>3. Giải pháp miễn phí thay thế (BYOK):</strong><br />
-                Nếu Bố đã có API Key riêng của Google Gemini (miễn phí) hoặc DeepSeek, Bố hoàn toàn có thể tự nhập vào mà không cần trả phí bất kỳ đồng nào!
+                Nếu bạn đã có API Key riêng của Google Gemini (miễn phí) hoặc DeepSeek, bạn hoàn toàn có thể tự nhập vào mà không cần trả phí bất kỳ đồng nào!
               </div>
             </div>
           )}
@@ -422,7 +422,7 @@ export default function ProUpgradeModal({
                 </div>
                 <ul style={{ margin: '0 0 0.5rem 1.2rem', padding: 0, lineHeight: '1.6' }}>
                   <li>Số tiền: <strong>75.000 VNĐ / 30 ngày</strong></li>
-                  <li>Nội dung chuyển: <code>EXAM PRO [Số điện thoại hoặc tên Bố]</code></li>
+                  <li>Nội dung chuyển: <code>EXAM PRO [Số điện thoại hoặc họ tên của bạn]</code></li>
                   <li>Liên hệ Admin qua <strong>Telegram <a href="https://t.me/huygia219" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>@huygia219</a></strong> để nhận ngay Mã VIP bản quyền kích hoạt tức thì!</li>
                 </ul>
               </div>

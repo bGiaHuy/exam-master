@@ -61,11 +61,11 @@ export default function HomeDashboard({
           <h1 style={{ fontSize: '2.1rem', fontWeight: '900', lineHeight: '1.3', marginBottom: '0.75rem', color: 'var(--text-main)' }}>
             {currentUser 
               ? (subscription?.isPro ? `Chào mừng ${currentUser.name} đến với ExamMaster PRO 💎` : `Chào mừng ${currentUser.name} đến với ExamMaster`)
-              : (subscription?.isPro ? 'Chào mừng Bố đến với ExamMaster PRO 💎' : 'Chào mừng Bố đến với ExamMaster')}
+              : (subscription?.isPro ? 'Chào mừng bạn đến với ExamMaster PRO 💎' : 'Chào mừng bạn đến với ExamMaster')}
           </h1>
           <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '1.5rem' }}>
             {subscription?.isPro 
-              ? `Tài khoản ${currentUser?.name || 'của Bố'} đang sở hữu toàn bộ đặc quyền cao cấp nhất: Chấm điểm tự luận không giới hạn, đường truyền AI ưu tiên tức thì 1-2s và phân tích chuyên sâu bản chất mọi câu sai!`
+              ? `Tài khoản ${currentUser?.name || 'của bạn'} đang sở hữu toàn bộ đặc quyền cao cấp nhất: Chấm điểm tự luận không giới hạn, đường truyền AI ưu tiên tức thì 1-2s và phân tích chuyên sâu bản chất mọi câu sai!`
               : `Hệ thống được thiết kế riêng để học tập dễ dàng nhất: Đọc bài giảng tiếng Việt có ví dụ minh họa gần gũi, thi cử chống phân tâm và tự động chuyển câu sai thành tự luận để AI chấm bài (Miễn phí 3 lần/ngày).`
             }
           </p>

@@ -248,7 +248,7 @@ export default function StudyHub({
           alignItems: 'center',
           gap: '0.5rem'
         }}>
-          <Check size={18} /> Đã lưu bài giảng mới vào thư viện học tập của bố!
+          <Check size={18} /> Đã lưu bài giảng mới vào thư viện học tập của bạn!
         </div>
       )}
 
@@ -271,7 +271,7 @@ export default function StudyHub({
 
           <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)', marginBottom: '1.25rem', lineHeight: '1.5' }}>
             Dán nội dung slide tiếng Anh vào đây. AI sẽ tự động phân tích, dịch các thuật ngữ khó sang tiếng Việt 
-            và <strong>chế tạo các ví dụ minh họa đời thực gần gũi bằng text</strong> giúp bố đọc một lần là hiểu ngay bản chất!
+            và <strong>chế tạo các ví dụ minh họa đời thực gần gũi bằng text</strong> giúp bạn đọc một lần là hiểu ngay bản chất!
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -373,7 +373,7 @@ export default function StudyHub({
                   className="btn btn-success"
                   onClick={handleSaveConvertedLecture}
                 >
-                  <Check size={16} /> Lưu Vào Danh Mục Bài Học Của Bố
+                  <Check size={16} /> Lưu Vào Danh Mục Bài Học Của Bạn
                 </button>
               </div>
 

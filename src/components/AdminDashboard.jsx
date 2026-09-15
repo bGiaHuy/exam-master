@@ -317,7 +317,7 @@ export default function AdminDashboard({
 
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={onBackToHome}>
-            <ArrowLeft size={16} /> Về Chế Độ Học Của Bố
+            <ArrowLeft size={16} /> Về Chế Độ Học Tập
           </button>
           <button className="btn btn-ghost" style={{ color: 'var(--danger)' }} onClick={handleLogout}>
             <LogOut size={16} /> Đăng Xuất Admin

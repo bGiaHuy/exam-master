@@ -12,12 +12,12 @@ import {
   ChevronDown, 
   ChevronUp, 
   ExternalLink,
-  GraduationCap,
   KeyRound,
-  UserCheck,
-  Building2,
   Mail,
-  Trash2
+  Trash2,
+  Copy,
+  Check,
+  Globe
 } from 'lucide-react';
 import { 
   getCurrentUser, 
@@ -25,9 +25,7 @@ import {
   saveSsoConfig, 
   loginWithGoogleCredential, 
   loginWithMicrosoftProfile, 
-  loginWithDemoProfile, 
   logoutSsoUser, 
-  DEMO_PROFILES, 
   loadGoogleIdentityScript 
 } from '../utils/ssoAuth';
 import { sound } from '../utils/soundEffects';
@@ -69,8 +67,10 @@ export default function SsoLoginModal({
   );
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(null);
   const [authError, setAuthError] = useState(null);
+  const [copiedOrigin, setCopiedOrigin] = useState(false);
 
   const googleBtnContainerRef = useRef(null);
+  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
     if (!isOpen) {
@@ -125,7 +125,37 @@ export default function SsoLoginModal({
 
   if (!isOpen) return null;
 
-  const handleSaveSettings = (e) => {
+  const handleCopyOrigin = () => {
+    if (currentOrigin && typeof navigator !== 'undefined') {
+      navigator.clipboard.writeText(currentOrigin);
+      setCopiedOrigin(true);
+      sound.playClick();
+      setTimeout(() => setCopiedOrigin(false), 2000);
+    }
+  };
+
+  const handleSaveDirectGoogleId = (e) => {
+    e.preventDefault();
+    const trimmed = googleClientId.trim();
+    if (!trimmed) {
+      setAuthError("Vui lòng nhập Google Client ID.");
+      return;
+    }
+
+    const updated = {
+      ...ssoConfig,
+      googleClientId: trimmed
+    };
+
+    saveSsoConfig(updated);
+    setConfig(getSsoConfig());
+    setSaveSuccessMsg("Đã lưu và kích hoạt Google SSO thành công!");
+    setAuthError(null);
+    sound.playCorrect();
+    setTimeout(() => setSaveSuccessMsg(null), 3000);
+  };
+
+  const handleSaveFullSettings = (e) => {
     e.preventDefault();
     const domains = allowedDomainsInput
       .split(',')
@@ -145,16 +175,17 @@ export default function SsoLoginModal({
     setTimeout(() => setSaveSuccessMsg(null), 3000);
   };
 
-  const handleGoogleClickWhenNoKey = () => {
-    // Show helpful guide to configure Client ID or use Demo SSO
-    setShowConfigDrawer(true);
-    setAuthError("Google Client ID chưa được cài đặt. Bạn có thể nhập Client ID bên dưới hoặc đăng nhập tức thì bằng tài khoản Học Viên / Bố.");
+  const handleClearGoogleId = () => {
+    saveSsoConfig({ googleClientId: '' });
+    setConfig(getSsoConfig());
+    setGoogleClientId('');
+    setSaveSuccessMsg("Đã gỡ bỏ Google Client ID.");
     sound.playClick();
+    setTimeout(() => setSaveSuccessMsg(null), 2500);
   };
 
   const handleMicrosoftClick = () => {
     if (ssoConfig.microsoftClientId) {
-      // Standard Microsoft OAuth popup flow
       const redirectUri = window.location.origin;
       const msAuthUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${encodeURIComponent(
         ssoConfig.microsoftClientId
@@ -167,24 +198,9 @@ export default function SsoLoginModal({
         setAuthError("Trình duyệt đã chặn cửa sổ pop-up. Vui lòng cho phép pop-up để đăng nhập Microsoft.");
       }
     } else {
-      // Direct quick student profile for FPT / Edu
-      const res = loginWithDemoProfile('demo_fpt_student');
-      if (res.success) {
-        sound.playCorrect();
-        if (onLoginSuccess) onLoginSuccess(res.user);
-        onClose();
-      }
-    }
-  };
-
-  const handleSelectDemo = (profileId) => {
-    const res = loginWithDemoProfile(profileId);
-    if (res.success) {
-      sound.playCorrect();
-      if (onLoginSuccess) onLoginSuccess(res.user);
-      onClose();
-    } else {
-      setAuthError(res.error);
+      setShowConfigDrawer(true);
+      setAuthError("Microsoft Client ID chưa được thiết lập. Bạn có thể cài đặt trong phần Cấu Hình bên dưới.");
+      sound.playClick();
     }
   };
 
@@ -225,7 +241,7 @@ export default function SsoLoginModal({
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0, marginTop: '0.2rem' }}>
               {currentUser 
                 ? 'Quản lý phiên đăng nhập và thông tin tài khoản của bạn'
-                : 'Đăng nhập bảo mật một chạm bằng tài khoản Google, Microsoft hoặc Chế độ Học viên'
+                : 'Đăng nhập bảo mật một chạm bằng tài khoản Google hoặc Microsoft'
               }
             </p>
           </div>
@@ -333,186 +349,211 @@ export default function SsoLoginModal({
           ) : (
             /* 2. STATE: NOT LOGGED IN */
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Main SSO Providers */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {/* Google Sign In */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                  {ssoConfig.googleClientId ? (
-                    <div ref={googleBtnContainerRef} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                      {/* GIS button mounts here */}
-                    </div>
-                  ) : (
-                    <button 
-                      className="sso-btn sso-btn-google"
-                      onClick={handleGoogleClickWhenNoKey}
-                      style={{ width: '100%' }}
-                    >
-                      <GoogleIcon />
-                      <span>Đăng nhập với Google</span>
-                    </button>
-                  )}
-                </div>
+              
+              {/* If Google Client ID is configured: Show GIS Button */}
+              {ssoConfig.googleClientId ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                  <div ref={googleBtnContainerRef} style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '44px' }}>
+                    {/* Google Identity Services button mounts here */}
+                  </div>
 
-                {/* Microsoft Sign In */}
-                <button 
-                  className="sso-btn sso-btn-microsoft"
-                  onClick={handleMicrosoftClick}
-                  style={{ width: '100%' }}
-                >
-                  <MicrosoftIcon />
-                  <span>Đăng nhập với Microsoft (Email FPT / Office 365)</span>
-                </button>
-
-                {/* Consent & Policy Links */}
-                <div style={{ fontSize: '0.76rem', color: 'var(--text-subtle)', textAlign: 'center', lineHeight: '1.4', marginTop: '0.2rem' }}>
-                  Bằng việc đăng nhập, bạn đồng ý với{' '}
+                  {/* Microsoft Sign In */}
                   <button 
-                    type="button" 
-                    className="footer-link-btn" 
-                    style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
-                    onClick={() => {
-                      onClose();
-                      if (onOpenLegalPolicy) onOpenLegalPolicy('terms');
-                    }}
+                    className="sso-btn sso-btn-microsoft"
+                    onClick={handleMicrosoftClick}
+                    style={{ width: '100%' }}
                   >
-                    Điều Khoản Dịch Vụ
+                    <MicrosoftIcon />
+                    <span>Đăng nhập với Microsoft (Email FPT / Office 365)</span>
                   </button>
-                  {' '}và{' '}
-                  <button 
-                    type="button" 
-                    className="footer-link-btn" 
-                    style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
-                    onClick={() => {
-                      onClose();
-                      if (onOpenLegalPolicy) onOpenLegalPolicy('privacy');
-                    }}
-                  >
-                    Chính Sách Quyền Riêng Tư
-                  </button>.
                 </div>
-              </div>
-
-              {/* Divider */}
-              <div className="sso-divider">
-                <span>Hoặc đăng nhập nhanh 1 chạm (Demo)</span>
-              </div>
-
-              {/* Quick Demo Profiles Grid */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                {DEMO_PROFILES.map((profile) => (
-                  <div 
-                    key={profile.id}
-                    className="sso-demo-card"
-                    onClick={() => handleSelectDemo(profile.id)}
-                  >
-                    <img 
-                      src={profile.avatar} 
-                      alt={profile.name}
-                      className="sso-demo-avatar"
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'space-between' }}>
-                        <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                          {profile.name}
-                        </strong>
-                        {profile.isPro ? (
-                          <span className="pro-badge" style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
-                            PRO VIP
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: '0.65rem', background: 'rgba(0,0,0,0.06)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: '600' }}>
-                            Miễn Phí
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        {profile.email}
-                      </div>
-                      <div style={{ fontSize: '0.73rem', color: 'var(--text-subtle)', marginTop: '0.15rem' }}>
-                        {profile.description}
-                      </div>
-                    </div>
+              ) : (
+                /* Google Client ID is NOT configured yet: Prominently provide the input box! */
+                <div style={{
+                  background: 'var(--bg-card)',
+                  border: '1.5px solid var(--primary-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem',
+                  boxShadow: 'var(--shadow-sm)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--primary)' }}>
+                    <KeyRound size={20} />
+                    <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: '800' }}>
+                      Cài Đặt Google Client ID (SSO ID)
+                    </h4>
                   </div>
-                ))}
-              </div>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem', lineHeight: '1.5' }}>
+                    Điền <strong>Google OAuth Client ID</strong> của bạn vào ô bên dưới để kích hoạt nút đăng nhập Google một chạm:
+                  </p>
 
-              {/* Collapsible SSO Setup Drawer */}
-              <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', marginTop: '0.5rem' }}>
-                <button 
-                  className="btn btn-ghost" 
-                  onClick={() => setShowConfigDrawer(!showConfigDrawer)}
-                  style={{ 
-                    width: '100%', 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    fontSize: '0.82rem',
-                    color: 'var(--text-muted)',
-                    padding: '0.4rem 0.6rem'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Settings size={15} />
-                    <span>⚙️ Cài đặt Google & Microsoft Client ID (Dành cho Quản Trị)</span>
-                  </div>
-                  {showConfigDrawer ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-
-                {showConfigDrawer && (
-                  <form onSubmit={handleSaveSettings} style={{ marginTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'var(--bg-glass)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                  <form onSubmit={handleSaveDirectGoogleId} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <div>
-                      <label style={{ fontSize: '0.78rem', fontWeight: '700', display: 'block', marginBottom: '0.25rem' }}>
-                        Google OAuth Client ID
-                      </label>
                       <input 
                         type="text"
                         className="form-input"
-                        placeholder="Ví dụ: 123456789-abcdef.apps.googleusercontent.com"
+                        placeholder="Dán Client ID (ví dụ: 123456789-abcdef.apps.googleusercontent.com)"
                         value={googleClientId}
                         onChange={(e) => setGoogleClientId(e.target.value)}
-                        style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
-                      />
-                      <span style={{ fontSize: '0.72rem', color: 'var(--text-subtle)' }}>
-                        Lấy từ Google Cloud Console (APIs & Services &gt; Credentials &gt; OAuth Client ID).
-                      </span>
-                    </div>
-
-                    <div>
-                      <label style={{ fontSize: '0.78rem', fontWeight: '700', display: 'block', marginBottom: '0.25rem' }}>
-                        Microsoft Entra Client ID (Tùy chọn)
-                      </label>
-                      <input 
-                        type="text"
-                        className="form-input"
-                        placeholder="Ví dụ: 89a8c17b-4029-4b68-967c-..."
-                        value={microsoftClientId}
-                        onChange={(e) => setMicrosoftClientId(e.target.value)}
-                        style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
+                        style={{ fontSize: '0.85rem', padding: '0.6rem 0.75rem', width: '100%' }}
+                        autoFocus
                       />
                     </div>
 
-                    <div>
-                      <label style={{ fontSize: '0.78rem', fontWeight: '700', display: 'block', marginBottom: '0.25rem' }}>
-                        Giới hạn Tên Miền Email (Phân tách bằng dấu phẩy)
-                      </label>
-                      <input 
-                        type="text"
-                        className="form-input"
-                        placeholder="Để trống = Mọi email (hoặc ví dụ: fpt.edu.vn, gmail.com)"
-                        value={allowedDomainsInput}
-                        onChange={(e) => setAllowedDomainsInput(e.target.value)}
-                        style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
-                      />
-                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.78rem', color: 'var(--text-subtle)' }}>
+                        <Globe size={14} />
+                        <span>Origin: <code>{currentOrigin || 'localhost'}</code></span>
+                        <button 
+                          type="button" 
+                          className="btn btn-ghost" 
+                          onClick={handleCopyOrigin}
+                          style={{ padding: '0.15rem 0.4rem', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+                          title="Sao chép Origin"
+                        >
+                          {copiedOrigin ? <Check size={12} color="var(--success)" /> : <Copy size={12} />}
+                          <span>{copiedOrigin ? 'Đã chép' : 'Sao chép'}</span>
+                        </button>
+                      </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-                      <button type="submit" className="btn btn-primary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.9rem' }}>
-                        Lưu Cấu Hình SSO
+                      <button type="submit" className="btn btn-primary" style={{ fontSize: '0.86rem', padding: '0.45rem 1rem', fontWeight: '700' }}>
+                        Lưu & Kích Hoạt Google SSO
                       </button>
                     </div>
                   </form>
-                )}
+
+                  {/* Quick Setup Instructions */}
+                  <div style={{
+                    marginTop: '1rem',
+                    paddingTop: '0.85rem',
+                    borderTop: '1px dashed var(--border-color)',
+                    fontSize: '0.78rem',
+                    color: 'var(--text-subtle)',
+                    lineHeight: '1.5'
+                  }}>
+                    <strong style={{ color: 'var(--text-main)' }}>Cách lấy Google Client ID:</strong>
+                    <ol style={{ margin: '0.3rem 0 0 1.2rem', padding: 0 }}>
+                      <li>Truy cập <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>Google Cloud Console Credentials <ExternalLink size={11} style={{ display: 'inline' }} /></a>.</li>
+                      <li>Tạo <strong>OAuth 2.0 Client ID</strong> (loại Web Application).</li>
+                      <li>Mục <strong>Authorized JavaScript origins</strong>: Thêm <code>{currentOrigin}</code>.</li>
+                      <li>Dán Client ID vào ô trên và bấm <strong>Lưu & Kích Hoạt</strong>.</li>
+                    </ol>
+                  </div>
+                </div>
+              )}
+
+              {/* Consent & Policy Links */}
+              <div style={{ fontSize: '0.76rem', color: 'var(--text-subtle)', textAlign: 'center', lineHeight: '1.4', marginTop: '0.2rem' }}>
+                Bằng việc đăng nhập, bạn đồng ý với{' '}
+                <button 
+                  type="button" 
+                  className="footer-link-btn" 
+                  style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
+                  onClick={() => {
+                    onClose();
+                    if (onOpenLegalPolicy) onOpenLegalPolicy('terms');
+                  }}
+                >
+                  Điều Khoản Dịch Vụ
+                </button>
+                {' '}và{' '}
+                <button 
+                  type="button" 
+                  className="footer-link-btn" 
+                  style={{ fontSize: '0.76rem', color: 'var(--primary)', fontWeight: '600' }}
+                  onClick={() => {
+                    onClose();
+                    if (onOpenLegalPolicy) onOpenLegalPolicy('privacy');
+                  }}
+                >
+                  Chính Sách Quyền Riêng Tư
+                </button>.
               </div>
+
+              {/* Collapsible Full SSO Settings Drawer (If Client ID already set, user can still edit it here) */}
+              {ssoConfig.googleClientId && (
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                  <button 
+                    className="btn btn-ghost" 
+                    onClick={() => setShowConfigDrawer(!showConfigDrawer)}
+                    style={{ 
+                      width: '100%', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      fontSize: '0.82rem',
+                      color: 'var(--text-muted)',
+                      padding: '0.4rem 0.6rem'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <Settings size={15} />
+                      <span>⚙️ Quản Lý & Đổi SSO Client ID (Google / Microsoft)</span>
+                    </div>
+                    {showConfigDrawer ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+
+                  {showConfigDrawer && (
+                    <form onSubmit={handleSaveFullSettings} style={{ marginTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                          <label style={{ fontSize: '0.78rem', fontWeight: '700' }}>
+                            Google OAuth Client ID
+                          </label>
+                          <button 
+                            type="button" 
+                            onClick={handleClearGoogleId}
+                            style={{ fontSize: '0.72rem', color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                          >
+                            Gỡ bỏ ID này
+                          </button>
+                        </div>
+                        <input 
+                          type="text"
+                          className="form-input"
+                          placeholder="Ví dụ: 123456789-abcdef.apps.googleusercontent.com"
+                          value={googleClientId}
+                          onChange={(e) => setGoogleClientId(e.target.value)}
+                          style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.78rem', fontWeight: '700', display: 'block', marginBottom: '0.25rem' }}>
+                          Microsoft Entra Client ID (Tùy chọn)
+                        </label>
+                        <input 
+                          type="text"
+                          className="form-input"
+                          placeholder="Ví dụ: 89a8c17b-4029-4b68-967c-..."
+                          value={microsoftClientId}
+                          onChange={(e) => setMicrosoftClientId(e.target.value)}
+                          style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ fontSize: '0.78rem', fontWeight: '700', display: 'block', marginBottom: '0.25rem' }}>
+                          Giới hạn Tên Miền Email (Phân tách bằng dấu phẩy)
+                        </label>
+                        <input 
+                          type="text"
+                          className="form-input"
+                          placeholder="Để trống = Mọi email (hoặc ví dụ: fpt.edu.vn, gmail.com)"
+                          value={allowedDomainsInput}
+                          onChange={(e) => setAllowedDomainsInput(e.target.value)}
+                          style={{ fontSize: '0.82rem', padding: '0.45rem 0.6rem', width: '100%' }}
+                        />
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+                        <button type="submit" className="btn btn-primary" style={{ fontSize: '0.82rem', padding: '0.4rem 0.9rem' }}>
+                          Lưu Thay Đổi Cấu Hình
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

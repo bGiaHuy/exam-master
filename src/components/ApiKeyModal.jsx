@@ -101,7 +101,7 @@ export default function ApiKeyModal({ isOpen, onClose, apiKey, onSaveApiKey }) {
           </div>
           <p style={{ color: 'var(--text-main)', margin: 0 }}>
             Hệ thống tự động nhận diện nếu bắt đầu bằng <code>sk-...</code> (DeepSeek) hoặc <code>AIzaSy...</code> (Gemini). 
-            Khóa lưu trực tiếp trên trình duyệt của bố (LocalStorage), không chia sẻ ra ngoài.
+            Khóa lưu trực tiếp trên trình duyệt của bạn (LocalStorage), không chia sẻ ra ngoài.
           </p>
         </div>
 

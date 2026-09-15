@@ -257,7 +257,7 @@ export default function EssayMistakeReview({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Crown size={20} color="#f59e0b" />
               <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                <strong>Tài khoản PRO Unlimited:</strong> Đang hoạt động • Bố thoải mái viết tự luận và hỏi đáp AI không giới hạn số lần!
+                <strong>Tài khoản PRO Unlimited:</strong> Đang hoạt động • Bạn thoải mái viết tự luận và hỏi đáp AI không giới hạn số lần!
               </div>
             </div>
             <span className="badge badge-purple" style={{ fontSize: '0.82rem' }}>
@@ -280,7 +280,7 @@ export default function EssayMistakeReview({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <Sparkles size={18} color={subStatus.remainingUses > 0 ? "#f59e0b" : "var(--danger)"} />
               <div style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>
-                Gói Miễn Phí: Bố còn <strong style={{ color: subStatus.remainingUses > 0 ? 'var(--primary)' : 'var(--danger)', fontSize: '1rem' }}>{subStatus.remainingUses} / 3</strong> lượt hỏi AI tự luận hôm nay.
+                Gói Miễn Phí: Bạn còn <strong style={{ color: subStatus.remainingUses > 0 ? 'var(--primary)' : 'var(--danger)', fontSize: '1rem' }}>{subStatus.remainingUses} / 3</strong> lượt hỏi AI tự luận hôm nay.
                 {subStatus.remainingUses === 0 && (
                   <span style={{ color: 'var(--danger)', fontWeight: '700', marginLeft: '0.4rem' }}>
                     (Đã hết lượt hôm nay)
@@ -540,7 +540,7 @@ export default function EssayMistakeReview({
                   <div className="pro-mnemonic-card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--purple)', fontWeight: '800', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
                       <Crown size={18} color="#f59e0b" />
-                      <span>💡 Bí Quyết Ghi Nhớ Sâu Cốt Lõi (Dành Cho Bố):</span>
+                      <span>💡 Bí Quyết Ghi Nhớ Sâu Cốt Lõi (Dành Cho Bạn):</span>
                     </div>
                     <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.6' }}>
                       <MarkdownViewer content={currentResult.mnemonicTip} />
@@ -557,7 +557,7 @@ export default function EssayMistakeReview({
                       Mở khóa Phân Tích Bẫy Đề Thi & Mẹo Nhớ Sâu Cốt Lõi
                     </strong>
                     <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                      Nâng cấp gói PRO (3$/tháng) để AI giải mã bẫy các phương án gây nhiễu và gợi ý mẹo nhớ đời thực cho Bố.
+                      Nâng cấp gói PRO (3$/tháng) để AI giải mã bẫy các phương án gây nhiễu và gợi ý mẹo nhớ đời thực cho bạn.
                     </p>
                   </div>
                 </div>
@@ -601,7 +601,7 @@ export default function EssayMistakeReview({
               {currentReplies.map((item, idx) => (
                 <div key={idx} style={{ marginBottom: '0.85rem', padding: '0.75rem', background: 'var(--bg-main)', borderRadius: 'var(--radius-sm)' }}>
                   <div style={{ fontWeight: '700', color: 'var(--text-main)', fontSize: '0.88rem', marginBottom: '0.25rem' }}>
-                    ❓ Bố hỏi ({item.time}): {item.q}
+                    ❓ Bạn hỏi ({item.time}): {item.q}
                   </div>
                   <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.5' }}>
                     <MarkdownViewer content={item.a} />

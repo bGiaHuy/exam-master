@@ -183,11 +183,11 @@ function generateLocalMnemonicTip(question) {
   const correctText = question.options?.[question.correctAnswer] || '';
 
   if (subj.includes('CEA') || question.questionText?.toLowerCase().includes('von neumann') || question.questionText?.toLowerCase().includes('cpu')) {
-    return `💡 **Mẹo liên tưởng đời thường (Dành cho Bố):**\n` +
+    return `💡 **Mẹo liên tưởng đời thường (Dành cho bạn):**\n` +
       `Hãy tưởng tượng CPU như "Người đầu bếp trưởng", Bộ nhớ RAM như "Chiếc thớt chế biến", và Ổ cứng như "Nhà kho dự trữ". ` +
       `Khi chế biến món ăn, đầu bếp chỉ lấy nguyên liệu ra thớt (RAM) để làm việc thật nhanh, sau khi xong mới cất lại kho. Nhớ nguyên tắc: *Lệnh và dữ liệu cùng nằm chung trên thớt để nấu liên tục!*`;
   } else if (subj.includes('DBI') || question.questionText?.toLowerCase().includes('sql') || question.questionText?.toLowerCase().includes('khóa')) {
-    return `💡 **Mẹo liên tưởng đời thường (Dành cho Bố):**\n` +
+    return `💡 **Mẹo liên tưởng đời thường (Dành cho bạn):**\n` +
       `Hãy hình dung Căn cước công dân (CCCD) chính là "Khóa chính (Primary Key)" - mỗi người chỉ có duy nhất 1 số và không bao giờ trùng lặp hay để trống! Mọi giấy tờ khác tham chiếu đến CCCD chính là "Khóa ngoại".`;
   } else {
     return `💡 **Bí quyết nhớ lâu:**\n` +
@@ -259,7 +259,7 @@ Giải thích chi tiết: "${question.explanation}"
 
 Học viên đặt câu hỏi thắc mắc: "${userQuery}"
 
-Nhiệm vụ của bạn: Hãy trả lời ân cần, sư phạm, súc tích và dễ hiểu nhất (như đang giải thích cho bố của bạn), tập trung tháo gỡ đúng thắc mắc của học viên.`;
+Nhiệm vụ của bạn: Hãy trả lời ân cần, sư phạm, súc tích và dễ hiểu nhất, tập trung tháo gỡ đúng thắc mắc của học viên.`;
 
   if (key) {
     try {

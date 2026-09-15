@@ -13,11 +13,11 @@ const SSO_LOGIN_HISTORY_KEY = 'exam_sso_login_history';
 
 // Default configuration
 const DEFAULT_SSO_CONFIG = {
-  googleClientId: '',
-  microsoftClientId: '',
+  googleClientId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_CLIENT_ID) || '',
+  microsoftClientId: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_MICROSOFT_CLIENT_ID) || '',
   allowedDomains: [], // Empty means all domains allowed
   autoProDomains: ['fpt.edu.vn'], // Auto grant PRO features for specific educational domains
-  enabledProviders: ['google', 'microsoft', 'demo']
+  enabledProviders: ['google', 'microsoft']
 };
 
 /**
@@ -192,54 +192,16 @@ export function loginWithMicrosoftProfile(msProfile) {
 }
 
 /**
- * Preset profiles for Quick 1-Click Demo SSO
+ * Quick Demo profiles have been removed as per user request.
+ * Real OAuth credentials (Google Client ID / Microsoft) should be configured.
  */
-export const DEMO_PROFILES = [
-  {
-    id: 'demo_dad_vip',
-    name: 'Bố (Tài Khoản Gia Đình VIP)',
-    email: 'bo.yeu@exammaster.vn',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-    provider: 'demo',
-    role: 'VIP Family',
-    isPro: true,
-    description: 'Tài khoản đặc quyền dành riêng cho Bố với đầy đủ tính năng PRO và giao diện tối ưu.'
-  },
-  {
-    id: 'demo_fpt_student',
-    name: 'Nguyễn Thế Anh (FPT Student)',
-    email: 'anhntse180123@fpt.edu.vn',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-    provider: 'demo',
-    role: 'Student',
-    isPro: true,
-    description: 'Sinh viên Đại học FPT - Tự động hưởng đặc quyền học tập & làm đề thi chuyên ngành.'
-  },
-  {
-    id: 'demo_standard_student',
-    name: 'Lê Minh Khôi (Học Viên Tự Do)',
-    email: 'minhkhoi.study@gmail.com',
-    avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80',
-    provider: 'demo',
-    role: 'Learner',
-    isPro: false,
-    description: 'Tài khoản học viên tiêu chuẩn với 3 lượt hỏi AI miễn phí mỗi ngày.'
-  }
-];
+export const DEMO_PROFILES = [];
 
 /**
- * Login with a Quick Demo profile
+ * Disabled demo login
  */
 export function loginWithDemoProfile(profileId) {
-  const profile = DEMO_PROFILES.find(p => p.id === profileId) || DEMO_PROFILES[0];
-  const user = {
-    ...profile,
-    domain: profile.email ? profile.email.split('@')[1] : '',
-    loggedInAt: Date.now()
-  };
-  saveUserSession(user);
-  recordLoginHistory(user);
-  return { success: true, user };
+  return { success: false, error: 'Chế độ đăng nhập demo đã bị gỡ bỏ. Vui lòng cấu hình Google Client ID để đăng nhập.' };
 }
 
 /**
