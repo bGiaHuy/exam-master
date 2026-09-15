@@ -422,7 +422,7 @@ export default function ProUpgradeModal({
                 <ul style={{ margin: '0 0 0.5rem 1.2rem', padding: 0, lineHeight: '1.6' }}>
                   <li>Số tiền: <strong>75.000 VNĐ / 30 ngày</strong></li>
                   <li>Nội dung chuyển: <code>EXAM PRO [Số điện thoại hoặc tên Bố]</code></li>
-                  <li>Liên hệ Admin qua <strong>Zalo / Telegram</strong> của gia đình để nhận ngay Mã VIP bản quyền kích hoạt tức thì!</li>
+                  <li>Liên hệ Admin qua <strong>Telegram <a href="https://t.me/huygia219" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline' }}>@huygia219</a></strong> để nhận ngay Mã VIP bản quyền kích hoạt tức thì!</li>
                 </ul>
               </div>
             )}

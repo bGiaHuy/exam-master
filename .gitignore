@@ -27,6 +27,9 @@ dist-ssr
 # Scratch / test scripts (not for production)
 scratch/
 
+# Key generator tool - KEEP LOCAL ONLY
+genkey.js
+
 # API Keys & Sensitive Credential Files
 *API*.md
 *api*.md
